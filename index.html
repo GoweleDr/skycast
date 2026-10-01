@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SkyCast — Weather Dashboard</title>
+    <meta
+      name="description"
+      content="SkyCast is a fast, beautiful weather dashboard: live conditions, a 24-hour outlook and a 7-day forecast for any city in the world."
+    />
+    <meta name="theme-color" content="#1e3a8a" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='26' fill='%23fde047'/></svg>" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="theme-clear-day">
+    <!-- Animated sky layer -->
+    <div class="sky" aria-hidden="true">
+      <div class="sky__sun"></div>
+      <div class="sky__stars"></div>
+      <div class="sky__cloud sky__cloud--1"></div>
+      <div class="sky__cloud sky__cloud--2"></div>
+      <div class="sky__cloud sky__cloud--3"></div>
+      <div class="sky__precip" id="precip"></div>
+      <div class="sky__flash"></div>
+    </div>
+
+    <div class="app">
+      <!-- ============ Top bar ============ -->
+      <header class="topbar">
+        <a href="./" class="brand" aria-label="SkyCast home">
+          <span class="brand__icon"><i class="fa-solid fa-cloud-sun"></i></span>
+          SkyCast
+        </a>
+
+        <form class="search" id="searchForm" role="search" autocomplete="off">
+          <i class="fa-solid fa-magnifying-glass search__icon"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search any city…"
+            aria-label="Search for a city"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+          />
+          <button type="button" class="search__locate" id="locateBtn" aria-label="Use my location" title="Use my location">
+            <i class="fa-solid fa-location-crosshairs"></i>
+          </button>
+          <ul class="suggestions" id="suggestions" role="listbox"></ul>
+        </form>
+
+        <div class="units" role="group" aria-label="Temperature unit">
+          <button class="units__btn is-active" data-unit="celsius" aria-pressed="true">°C</button>
+          <button class="units__btn" data-unit="fahrenheit" aria-pressed="false">°F</button>
+        </div>
+      </header>
+
+      <div class="recent" id="recent" aria-label="Recent searches"></div>
+
+      <!-- ============ Status (loading / error) ============ -->
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+
+      <!-- ============ Dashboard ============ -->
+      <main class="dashboard" id="dashboard">
+        <!-- Current -->
+        <section class="card current">
+          <div class="current__head">
+            <div>
+              <h1 class="current__city" id="city">—</h1>
+              <p class="current__date" id="localTime">—</p>
+            </div>
+            <span class="pill" id="dayNight"><i class="fa-solid fa-sun"></i> Day</span>
+          </div>
+
+          <div class="current__main">
+            <div class="current__icon" id="currentIcon"><i class="fa-solid fa-sun"></i></div>
+            <div>
+              <div class="current__temp"><span id="temp">--</span><sup id="tempUnit">°C</sup></div>
+              <p class="current__desc" id="desc">—</p>
+              <p class="current__range">
+                <span><i class="fa-solid fa-arrow-up"></i> <b id="hi">--</b></span>
+                <span><i class="fa-solid fa-arrow-down"></i> <b id="lo">--</b></span>
+                <span>Feels like <b id="feels">--</b></span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Highlights -->
+        <section class="card highlights">
+          <h2 class="card__title">Today's highlights</h2>
+          <div class="stats">
+            <div class="stat">
+              <i class="fa-solid fa-droplet"></i>
+              <span class="stat__label">Humidity</span>
+              <span class="stat__value" id="humidity">--</span>
+              <div class="meter"><span id="humidityBar"></span></div>
+            </div>
+            <div class="stat">
+              <i class="fa-solid fa-wind"></i>
+              <span class="stat__label">Wind</span>
+              <span class="stat__value" id="wind">--</span>
+              <span class="stat__sub" id="windDir">
+                <i class="fa-solid fa-location-arrow" id="windArrow"></i> <span id="windDirText">--</span>
+              </span>
+            </div>
+            <div class="stat">
+              <i class="fa-solid fa-sun"></i>
+              <span class="stat__label">UV index (max)</span>
+              <span class="stat__value" id="uv">--</span>
+              <span class="stat__sub" id="uvText">--</span>
+            </div>
+            <div class="stat">
+              <i class="fa-solid fa-gauge-high"></i>
+              <span class="stat__label">Pressure</span>
+              <span class="stat__value" id="pressure">--</span>
+              <span class="stat__sub">hPa</span>
+            </div>
+            <div class="stat">
+              <i class="fa-solid fa-umbrella"></i>
+              <span class="stat__label">Chance of rain</span>
+              <span class="stat__value" id="rainChance">--</span>
+              <div class="meter meter--blue"><span id="rainBar"></span></div>
+            </div>
+            <div class="stat stat--sun">
+              <i class="fa-solid fa-cloud-sun"></i>
+              <span class="stat__label">Sunrise · Sunset</span>
+              <span class="stat__value stat__value--sm">
+                <span id="sunrise">--</span> · <span id="sunset">--</span>
+              </span>
+              <div class="sunpath"><span id="sunDot"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Hourly -->
+        <section class="card hourly">
+          <h2 class="card__title">Next 24 hours</h2>
+          <div class="hourly__track" id="hourly" tabindex="0" aria-label="Hourly forecast"></div>
+        </section>
+
+        <!-- Daily -->
+        <section class="card daily">
+          <h2 class="card__title">7-day forecast</h2>
+          <ul class="daily__list" id="daily"></ul>
+        </section>
+      </main>
+
+      <footer class="footer">
+        Built by <a href="https://github.com/GoweleDr" target="_blank" rel="noopener">Coder Dav</a> ·
+        Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
